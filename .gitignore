@@ -1,0 +1,12 @@
+#Do not version the following files. Knabe 2017-03-29
+
+#SBT generated, also in subdirectories:
+target/
+
+#IntelliJ IDEA generated:
+/*.iml
+/.idea/
+
+#Eclipse resp. Scala IDE generated:
+/.project
+/.classpath
