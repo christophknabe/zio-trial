@@ -5,15 +5,17 @@ package zio_trial
  */
 import java.io.IOException
 
-import zio.{ZIO}
-import zio.console.{Console, putStrLn, getStrLn}
+import zio.{ExitCode, ZIO}
+import zio.console.{Console, getStrLn, putStrLn}
 
 /**Adapted from https://zio.dev/docs/getting_started.html */
-object HelloForApp extends zio.App {
+object HelloForZioApp extends zio.App {
 
   /**Runs the effect model as an app. All errors have to be mapped to an Int != 0 inside.*/
-  def run(args: List[String]): ZIO[Console, Nothing, Int] =
-    myAppLogic.fold(_ => 1, _ => 0)
+  def run(args: List[String]): ZIO[Console, Nothing, ExitCode] = {
+    import ExitCode._
+    myAppLogic.fold(_ => failure, _ => success)
+  }
 
   /**The app logic as an effect model.
     * The logic needs a Console, and either fails with an IOException,

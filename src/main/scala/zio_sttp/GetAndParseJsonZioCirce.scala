@@ -13,7 +13,7 @@ import zio.console.Console
 //See https://sttp.softwaremill.com/en/latest/examples.html
 object GetAndParseJsonZioCirce extends App {
 
-  override def run(args: List[String]): ZIO[ZEnv, Nothing, Int] = {
+  override def run(args: List[String]): ZIO[ZEnv, Nothing, ExitCode] = {
 
     case class HttpBinResponse(origin: String, headers: Map[String, String])
 
@@ -31,6 +31,7 @@ object GetAndParseJsonZioCirce extends App {
 
     // provide an implementation for the SttpClient dependency; other dependencies are
     // provided by Zio
-    sendAndPrint.provideCustomLayer(AsyncHttpClientZioBackend.layer()).fold(_ => 1, _ => 0)
+    import ExitCode._
+    sendAndPrint.provideCustomLayer(AsyncHttpClientZioBackend.layer()).fold(_ => failure, _ => success)
   }
 }

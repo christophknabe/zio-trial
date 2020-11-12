@@ -8,20 +8,24 @@ import zio.test.environment._
 import zio.test.junit.JUnitRunnableSpec
 
 object HelloWorld {
+
   def sayHello: ZIO[Console, Nothing, Unit] =
     console.putStrLn("Hello, World!")
+
 }
 
 class EffectfulSpecWithJUnit extends JUnitRunnableSpec {
   import HelloWorld._
 
-  def spec = suite(getClass.getSimpleName)(
-    testM("sayHello correctly displays output") {
-      for {
-        _      <- sayHello
-        output <- TestConsole.output
-      } yield assert(output)(equalTo(Vector("Hello, World!\n")))
-      //returns a ZIO
-    }
-  )
+  def spec =
+    suite(getClass.getSimpleName)(
+      testM("sayHello correctly displays output") {
+        for {
+          _ <- sayHello
+          output <- TestConsole.output
+        } yield assert(output)(equalTo(Vector("Hello, World!\n")))
+        //returns a ZIO
+      }
+    )
+
 }
