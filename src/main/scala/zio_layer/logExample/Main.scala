@@ -6,7 +6,10 @@ import zio.clock.Clock
 import zio.console.Console
 import zio.{ExitCode, ZIO}
 
-/** Logs a message with a timestamp to the console. */
+/** Logs a message with a timestamp to the console.
+  * @author Christoph Knabe
+  * @since 2020-04-10
+  */
 object Main extends zio.App {
 
   /**Runs the effect model as an app. If errors occur, they have to be mapped to an ExitCode != success inside.*/
@@ -19,8 +22,9 @@ object Main extends zio.App {
   /**The app logic as an effect model.
     * The logic needs a Logging layer, can fail with a DateTimeException,
     * or succeeds returning nothing (all it does is a side effect). */
-  val myAppLogic: ZIO[Logging, DateTimeException, Unit] = ZIO.accessM{
+  val myAppLogic: ZIO[Logging, DateTimeException, Unit] = ZIO.accessM {
     logging =>
-    logging.get.logLine("Hello! Here I am.")
+      logging.get.logLine("Hello! Here I am.")
   }
+
 }

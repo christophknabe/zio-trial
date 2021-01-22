@@ -7,7 +7,7 @@ import zio.test.Assertion._
 import zio.test.environment._
 import zio.test.junit.JUnitRunnableSpec
 
-object HelloWorld {
+object EffectfulSpecWithJUnit {
 
   def sayHello: ZIO[Console, Nothing, Unit] =
     console.putStrLn("Hello, World!")
@@ -15,7 +15,8 @@ object HelloWorld {
 }
 
 class EffectfulSpecWithJUnit extends JUnitRunnableSpec {
-  import HelloWorld._
+
+  import EffectfulSpecWithJUnit._
 
   def spec =
     suite(getClass.getSimpleName)(

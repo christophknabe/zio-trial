@@ -1,11 +1,11 @@
 package zio_trial
 
-import java.io.{EOFException, IOException}
+import java.io.EOFException
 
-import zio.{Cause, IO, Runtime, ZEnv, ZIO}
 import zio.console.putStrLn
+import zio.{Cause, IO, Runtime, UIO, ZEnv, ZIO}
 
-/** Program for manually testing the ZIO Error Reporting. Adapted from [[https://zio.dev/docs/getting_started.html]]
+/** Program for testing how to run a ZIO app by [[Runtime.unsafeRunAsync]]. Adapted from [[https://zio.dev/docs/getting_started.html]]
   *
   * '''Happy path''': Type in at the prompts your first name, and your last name. You will be helloed with your full name.
   *
@@ -18,24 +18,22 @@ import zio.console.putStrLn
   * The app exits with an error code (0 if successful, 1 if erroneous).
   *
   * @author Christoph Knabe
-  * @since 2020-03-03 */
-object HelloErrorReportingScalaApp extends scala.App {
+  * @since 2020-11-27 */
+object HelloUnsafeRunAsyncScalaApp extends scala.App {
 
   val runtime = Runtime.default
-    .withReportFailure(_reportCause) //ZIO 1.0.0-RC18-2
 
-  /** Runs the effect model as an app. All unhandled ZIO errors, as well as all unhandled Throwables
-    * cause termination and are reported to stderr by the ZIO runtime.
-    * They can be reported alternatively by `.withReportFailure(_reportCause)`. */
-  val exitCode = runtime.unsafeRunSync(myAppLogic)
-  // All errors are mapped to exitCode 1, all successes to exitCode 0.
-    .fold(cause => 1, result => { println("ZIO App completed successfully."); 0 })
-
-  System.exit(exitCode)
+  /** Runs the effect model as an app. All unhandled ZIO failures, as well as all unhandled defects
+    * cause termination and are reported to stderr by the ZIO runtime. */
+  runtime.unsafeRunAsync(myAppLogic)(exit =>
+    exit // All errors are mapped to exitCode 1, all successes to exitCode 0.
+      .fold(cause => System.exit(1), result => { println("ZIO App completed successfully."); System.exit(0) })
+  )
+  Thread.sleep(10000)
 
   /** The app logic as an effect model.
     * If you provoke an exception by typing in `<Ctrl/D>`, it will be
-    * propagated by the ZIO expected error channel, here of type `IOException`. */
+    * propagated by the ZIO failure channel for modelled errors, here of type [[EOFException]]. */
   def myAppLogic: ZIO[ZEnv, EOFException, Unit] = {
     for {
       _ <- putStrLn("Hello! What is your first name?")
@@ -44,19 +42,6 @@ object HelloErrorReportingScalaApp extends scala.App {
       lastName <- unfailableGetStrLn()
       _ <- putStrLn(s"Hello, $firstName $lastName, welcome to ZIO!")
     } yield ()
-  }
-
-  /** Synchronously reports the death or failure `cause` with a detailed async execution trace to scala.Console.err.
-    * In contrary to the default failure reporter it reports only the causing exception, but not the useless stack trace of it.  */
-  private def _reportCause(cause: Cause[Any]): Unit = {
-    val prefix = "ZIO App "
-    val defects = cause.defects
-    val defectsPart = if (defects.isEmpty) "" else defects.map(_makeStackTrace).mkString("died with:\n", "\n", "\n")
-    val failures = cause.failures
-    val failuresPart = if (failures.isEmpty) "" else failures.mkString("failed with:\n", "\n", "\n")
-    val traces = cause.traces.map(_.prettyPrint).mkString("\n", "\n", "\n")
-    val report = prefix + defectsPart + failuresPart + traces
-    scala.Console.err.println(report)
   }
 
   // The following code is adapted from zio.console
@@ -74,7 +59,7 @@ object HelloErrorReportingScalaApp extends scala.App {
     * Fails expectedly when the underlying [[java.io.Reader]]
     * returns null.
     */
-  final def failableGetStrLn(): ZIO[Any, EOFException, String] =
+  final def failableGetStrLn(): IO[EOFException, String] =
     IO.effect(SConsole.withIn(SConsole.in) {
       val line = StdIn.readLine()
       if (line == null) {
@@ -93,21 +78,12 @@ object HelloErrorReportingScalaApp extends scala.App {
     * Fails unexpectedly when the underlying [[java.io.Reader]]
     * returns null.
     */
-  final def unfailableGetStrLn(): ZIO[Any, Nothing, String] =
-    IO.effectTotal(SConsole.withIn(SConsole.in) {
+  final def unfailableGetStrLn(): UIO[String] =
+    UIO(SConsole.withIn(SConsole.in) {
       val line = StdIn.readLine()
       if (line == null) {
         throw new EOFException("Unexpected EOF: There is no more input left to read")
       } else line
     })
-
-  private def _makeStackTrace(throwable: Throwable): String = {
-    val result = new StringBuilder(throwable.toString)
-    for (elem <- throwable.getStackTrace) {
-      result append "\n\tat "
-      result append elem
-    }
-    result.toString()
-  }
 
 }

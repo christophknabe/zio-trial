@@ -26,6 +26,7 @@ libraryDependencies ++= Seq(
   //test dependencies:
   "dev.zio" %% "zio-test" % zioVersion % Test,
   "dev.zio" %% "zio-test-sbt" % zioVersion % Test,
+  "dev.zio" %% "zio-test-magnolia" % zioVersion % Test, // optional
   "dev.zio" %% "zio-test-junit" % zioVersion % Test,
   "com.novocode" % "junit-interface" % "0.11" % Test,
   "org.scalatest" %% "scalatest" % "3.2.0" % Test

@@ -1,7 +1,7 @@
 package zio_layer
 
 /** New style modularization following the Has pattern of https://docs.google.com/document/d/1P0mx1gSNU2UTi-9PXUeY8O74v5gyK-UETznM1SbkQjA/
-  * in ist section "Example" */
+  * in its section "Example" */
 package object layer_style {
   import zio._
   import zio.console.Console
@@ -21,6 +21,7 @@ package object layer_style {
             console.putStrLn(line)
         }
       }
+
   }
 
   type Authorization = Has[Authorization.Service]
@@ -37,6 +38,7 @@ package object layer_style {
           val key = 123L
         }
       }
+
   }
 
   type Database[K, V] = Has[Database.Service[K, V]]
@@ -49,19 +51,23 @@ package object layer_style {
     }
 
     final case class InMemory[K, V](
-                                     state: Ref[Map[K, V]],
-                                     logging: Logging.Service,
-                                     authorization: Authorization.Service
-                                   ) extends Database.Service[K, V] {
+        state: Ref[Map[K, V]],
+        logging: Logging.Service,
+        authorization: Authorization.Service
+    )
+    extends Database.Service[K, V] {
+
       override def get(key: K): UIO[Option[V]] =
         state.get.map(_.get(key))
+
       override def set(key: K, value: V): UIO[Unit] =
         state.update(_.updated(key, value)).unit
+
     }
 
-    def inMemory[K, V](
-                        implicit tag: Tagged[Database.Service[K, V]]
-                      ): ZLayer[Logging with Authorization, Nothing, Database[K, V]] =
+    def inMemory[K, V](implicit
+        tag: Tagged[Database.Service[K, V]]
+    ): ZLayer[Logging with Authorization, Nothing, Database[K, V]] =
       ZLayer
         .fromServicesM[
           Logging.Service,
@@ -74,6 +80,7 @@ package object layer_style {
             InMemory(state, logging, authorization)
           }
         }
+
   }
 
 }
