@@ -1,9 +1,13 @@
 package zio_trial.mock
 
-import zio.{Has, UIO, URIO, ZIO, ZLayer}
+import zio.{Has, UIO, ZIO, ZLayer}
 import zio_trial.mock.Files.Files
 
-/** ZIO module representing a set of users. */
+/** ZIO module representing a set of users.
+  * This module depends on an implementation of the {@link Files} module.
+  * @since 2021-01-27
+  * @author Christoph Knabe
+  */
 object Users {
 
   type Users = Has[Users.Service]
@@ -15,7 +19,7 @@ object Users {
   }
 
   /** A ZLayer for Users based on Files which adds the file sizes of the subfiles "A" and "B" of the user.*/
-  val summingFilesAB: ZLayer[Files, Nothing, Users] =
+  val recipe: ZLayer[Files, Nothing, Users] =
     ZLayer.fromService { files =>
       new Users.Service {
         override def spaceUsedByUser(username: String): UIO[Long] =
@@ -27,19 +31,6 @@ object Users {
     }
 
   //Access functions:
-  def spaceUsedByUser(username: String): ZIO[Files, Nothing, Long] = ZIO.accessM(_.get.spaceUsedByUser(username))
-
-}
-
-/** ZIO module representing a set of files. */
-object Files {
-
-  type Files = Has[Files.Service]
-
-  trait Service {
-
-    /** Returns the amount of bytes used by the file at the given `path`. */
-    def fileSize(path: String): UIO[Long]
-  }
+  def spaceUsedByUser(username: String): ZIO[Users, Nothing, Long] = ZIO.accessM(_.get.spaceUsedByUser(username))
 
 }
