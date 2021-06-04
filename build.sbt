@@ -22,8 +22,9 @@ libraryDependencies ++= Seq(
   "io.circe" %% "circe-parser" % circeVersion, //without JS dependency
   "org.slf4j" % "slf4j-simple" % "1.7.30", //avoid Failed to load class "org.slf4j.impl.StaticLoggerBinder"
   "dev.zio" %% "zio-logging-slf4j" % "0.5.3", //version number independent of ZIO
-
-  //test dependencies:
+  // https://mvnrepository.com/artifact/dev.zio/zio-actors
+  "dev.zio" %% "zio-actors" % "0.0.9",
+//test dependencies:
   "dev.zio" %% "zio-test" % zioVersion % Test,
   "dev.zio" %% "zio-test-sbt" % zioVersion % Test,
   "dev.zio" %% "zio-test-magnolia" % zioVersion % Test, // optional

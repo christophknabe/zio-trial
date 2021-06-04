@@ -8,3 +8,5 @@ Additionally it demonstrates in package `zio_layer` how to combine a `Logging` `
 
 In package `zio_trial.mock` it shows how to unit-test a `Users` module which uses a `Files` module
 with the help of a mocked `Files` service.
+
+In package `zio_actors` the program `PingPongMain` shows the classical Ping Pong example with ZIO actors and the way how to run them.
